@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual env
+.venv/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Test outputs
+allure-results/
+allure-report/
+test-results/
+playwright-report/
+.playwright/
+htmlcov/
+coverage.xml
+.coverage
+
+# Great Expectations
+gx/uncommitted/
+gx/checkpoints/
+
+# Generated reports
+reports/
+*.html
+!docs/*.html
+
+# Downloaded snapshots (keep curated samples, ignore ad-hoc downloads)
+data/downloads/
+data/snapshots/_*.csv
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Personal notes (not for public repo)
+docs/INTERVIEW_QA.md
