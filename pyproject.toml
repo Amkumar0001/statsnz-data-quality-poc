@@ -1,0 +1,23 @@
+[project]
+name = "statsnz-dq"
+version = "0.1.0"
+description = "Data-quality test framework for Stats NZ open datasets"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "great-expectations>=1.17.1",
+    "pandas>=3.0.2",
+    "pandera>=0.31.1",
+    "playwright>=1.59.0",
+    "pytest>=9.0.3",
+    "pytest-playwright>=0.7.2",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.1",
+]
+
+[dependency-groups]
+dev = [
+    "allure-pytest>=2.16.0",
+    "pytest-html>=4.2.0",
+    "ruff>=0.15.12",
+]
