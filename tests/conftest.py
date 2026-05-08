@@ -46,3 +46,8 @@ def statsnz_site_url() -> str:
 @pytest.fixture
 def cpi_dataframe() -> pd.DataFrame:
     return load_cpi_snapshot("cpi_sample.csv")
+
+
+@pytest.fixture
+def cpi_dataframe_api_mirror() -> pd.DataFrame:
+    return load_cpi_snapshot("cpi_sample_api.csv")
