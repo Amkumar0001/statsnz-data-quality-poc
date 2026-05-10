@@ -17,7 +17,8 @@ All notable changes to this POC. Newest first.
   and reconciliation. All pass on committed sample snapshot.
 - `tests/api/`: live smoke tests against Stats NZ OData (skips without
   key) and data.govt.nz CKAN (no auth).
-- `tests/ui/`: Playwright homepage + search UI test, end-to-end UI↔API
-  reconciliation placeholder.
+- `tests/ui/`: Playwright homepage + search UI test against the public
+  Stats NZ site, with role-based selectors and the human-readable
+  step logger wired through the Page Objects.
 - GitHub Actions workflow: offline suite on every push, live suite
   on workflow_dispatch (uses `STATS_NZ_API_KEY` secret).
