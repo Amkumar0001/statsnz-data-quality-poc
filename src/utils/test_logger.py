@@ -1,25 +1,7 @@
-"""Human-readable test logger.
+"""Hierarchical, human-readable test logger.
 
-Python port of the TypeScript logger pattern published in
-"Building a Human-Readable Logger Utility for Mobile E2E Test
-Automation" (medium.com/@Amkumar001, Jan 2026).
-
-Same shape as the original — module-level functions, no class —
-so callers can ``from src.utils.test_logger import log_click,
-log_section`` without instantiating anything. Zero external
-dependencies; ANSI codes are written directly to stdout.
-
-Hierarchy:
-
-    Section   ─ logical grouping (e.g. "User Authentication")
-      Step    ─ a single user action with timestamp + emoji
-        SubStep   ─ outcome of the step ("…is now displayed")
-        Detail    ─ raw context / error message
-
-Run any test that uses these helpers in a colour-capable terminal
-to see the output. Pytest captures stdout by default — pass ``-s``
-to keep colours streaming live, or look at the captured stdout block
-in the failure report.
+Section → Step → SubStep → Detail. Writes to the original stdout so
+output isn't swallowed by pytest's sys-mode capture.
 """
 
 from __future__ import annotations
@@ -32,30 +14,11 @@ from functools import wraps
 from typing import Literal, ParamSpec, TypeVar
 
 LogCategory = Literal[
-    "scroll",
-    "keyboard",
-    "click",
-    "input",
-    "wait",
-    "verify",
-    "context",
-    "navigation",
-    "navigate",
-    "element",
-    "gesture",
-    "info",
-    "warning",
-    "success",
-    "error",
-    "extract",
-    "schema",
-    "quality",
-    "reconciliation",
+    "scroll", "keyboard", "click", "input", "wait", "verify",
+    "context", "navigation", "navigate", "element", "gesture",
+    "info", "warning", "success", "error", "extract",
+    "schema", "quality", "reconciliation",
 ]
-
-# ---------------------------------------------------------------------------
-# ANSI colour codes
-# ---------------------------------------------------------------------------
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -68,59 +31,30 @@ GRAY = "\033[90m"
 RED = "\033[31m"
 
 _COLOUR_MAP: dict[str, str] = {
-    "scroll": BLUE,
-    "keyboard": MAGENTA,
-    "click": CYAN,
-    "input": GREEN,
-    "wait": YELLOW,
-    "verify": GREEN,
-    "context": GRAY,
-    "navigation": BLUE,
-    "navigate": BLUE,
-    "element": CYAN,
-    "gesture": MAGENTA,
-    "info": CYAN,
-    "warning": YELLOW,
-    "success": GREEN,
-    "error": RED,
-    "extract": MAGENTA,
-    "schema": MAGENTA,
-    "quality": CYAN,
-    "reconciliation": BLUE,
+    "scroll": BLUE, "keyboard": MAGENTA, "click": CYAN, "input": GREEN,
+    "wait": YELLOW, "verify": GREEN, "context": GRAY, "navigation": BLUE,
+    "navigate": BLUE, "element": CYAN, "gesture": MAGENTA, "info": CYAN,
+    "warning": YELLOW, "success": GREEN, "error": RED, "extract": MAGENTA,
+    "schema": MAGENTA, "quality": CYAN, "reconciliation": BLUE,
 }
 
 _EMOJI_MAP: dict[str, str] = {
-    "scroll": "📜",
-    "keyboard": "⌨️ ",
-    "click": "👆",
-    "input": "✏️ ",
-    "wait": "⏳",
-    "verify": "✓",
-    "context": "•",
-    "navigation": "🧭",
-    "navigate": "🧭",
-    "element": "•",
-    "gesture": "👋",
+    "scroll": "📜", "keyboard": "⌨️ ", "click": "👆", "input": "✏️ ",
+    "wait": "⏳", "verify": "✓", "context": "•", "navigation": "🧭",
+    "navigate": "🧭", "element": "•", "gesture": "👋",
     "info": "ℹ️ ",  # noqa: RUF001
-    "warning": "⚠️ ",
-    "success": "✅",
-    "error": "❌",
-    "extract": "🔍",
-    "schema": "📐",
-    "quality": "📊",
-    "reconciliation": "⚖️ ",
+    "warning": "⚠️ ", "success": "✅", "error": "❌", "extract": "🔍",
+    "schema": "📐", "quality": "📊", "reconciliation": "⚖️ ",
 }
 
 _BAR = "═" * 67
 
-# Always write to the *original* stdout, not whatever pytest has swapped in
-# for its capture machinery. Otherwise passing tests show no log output —
-# the whole point of the logger is to narrate execution as it runs.
+# Original stdout — pytest's capture replaces sys.stdout, this stays put.
 _OUT = sys.__stdout__
-
-# Disable colours when the real stdout isn't a tty (CI logs, file redirects)
-# or when NO_COLOR is set (https://no-color.org).
 _USE_COLOUR = _OUT is not None and _OUT.isatty() and not os.environ.get("NO_COLOR")
+
+_step_counter = 0
+_section_counter = 0
 
 
 def _c(code: str) -> str:
@@ -128,33 +62,7 @@ def _c(code: str) -> str:
 
 
 def _write(line: str = "") -> None:
-    """Print to the original stdout, bypassing pytest's capture buffer."""
     print(line, file=_OUT, flush=True)
-
-
-# ---------------------------------------------------------------------------
-# Module-level state — counters reset between tests via reset_step_counter()
-# ---------------------------------------------------------------------------
-
-_step_counter = 0
-_section_counter = 0
-
-
-def reset_step_counter() -> None:
-    """Zero the step + section counters. Call at the start of each test."""
-    global _step_counter, _section_counter
-    _step_counter = 0
-    _section_counter = 0
-
-
-def step_count() -> int:
-    """Current step counter — exposed for the test summary banner."""
-    return _step_counter
-
-
-# ---------------------------------------------------------------------------
-# Lookup helpers
-# ---------------------------------------------------------------------------
 
 
 def _category_colour(category: LogCategory) -> str:
@@ -166,17 +74,20 @@ def _category_emoji(category: LogCategory) -> str:
 
 
 def _timestamp() -> str:
-    # HH:MM:SS.mmm — drop tz, drop trailing microseconds beyond 3 digits
     return datetime.now().strftime("%H:%M:%S.%f")[:-3]
 
 
-# ---------------------------------------------------------------------------
-# Core hierarchical primitives
-# ---------------------------------------------------------------------------
+def reset_step_counter() -> None:
+    global _step_counter, _section_counter
+    _step_counter = 0
+    _section_counter = 0
+
+
+def step_count() -> int:
+    return _step_counter
 
 
 def log_section(title: str) -> None:
-    """Top-level grouping. Resets the step counter for the new section."""
     global _section_counter, _step_counter
     _section_counter += 1
     _step_counter = 0
@@ -187,7 +98,6 @@ def log_section(title: str) -> None:
 
 
 def log_step(category: LogCategory, message: str) -> None:
-    """A single user-action step. Increments the step counter."""
     global _step_counter
     _step_counter += 1
     colour = _category_colour(category)
@@ -200,20 +110,13 @@ def log_step(category: LogCategory, message: str) -> None:
 
 
 def log_substep(category: LogCategory, message: str) -> None:
-    """Outcome / consequence of the previous step (no counter bump)."""
     colour = _category_colour(category)
     emoji = _category_emoji(category)
     _write(f"         └─ {emoji} {_c(colour)}{message}{_c(RESET)}")
 
 
 def log_detail(message: str) -> None:
-    """Subsidiary context (errors, expected/actual, raw values)."""
     _write(f"         {_c(GRAY)}{message}{_c(RESET)}")
-
-
-# ---------------------------------------------------------------------------
-# Pre-built semantic helpers — match the TS port 1:1 where applicable
-# ---------------------------------------------------------------------------
 
 
 def log_click(element_name: str) -> None:
@@ -266,11 +169,6 @@ def log_retry(action: str, attempt: int, max_attempts: int) -> None:
     log_step("warning", f"Retrying '{action}' (attempt {attempt}/{max_attempts})")
 
 
-# ---------------------------------------------------------------------------
-# Data-quality additions (not in the original mobile-E2E article)
-# ---------------------------------------------------------------------------
-
-
 def log_schema_check(dataset: str, passed: bool) -> None:
     if passed:
         log_step("schema", f"Schema contract holds for '{dataset}'")
@@ -299,11 +197,6 @@ def log_reconciliation(
         )
 
 
-# ---------------------------------------------------------------------------
-# Test summary banner
-# ---------------------------------------------------------------------------
-
-
 def log_test_summary(test_name: str, passed: bool, duration_ms: float) -> None:
     _write()
     _write(f"{_c(BOLD)}{_BAR}{_c(RESET)}")
@@ -316,10 +209,6 @@ def log_test_summary(test_name: str, passed: bool, duration_ms: float) -> None:
     _write(f"{_c(BOLD)}{_BAR}{_c(RESET)}")
 
 
-# ---------------------------------------------------------------------------
-# Higher-order wrapper — apply consistent logging to any callable
-# ---------------------------------------------------------------------------
-
 P = ParamSpec("P")
 R = TypeVar("R")
 
@@ -328,12 +217,6 @@ def with_logging(
     category: LogCategory,
     description: str | Callable[..., str],
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Decorator that emits a step before the call and an error log on failure.
-
-    `description` may be either a static string or a callable producing one
-    from the wrapped function's args — same idea as the TS HOF.
-    """
-
     def decorator(fn: Callable[P, R]) -> Callable[P, R]:
         @wraps(fn)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:

@@ -1,9 +1,3 @@
-"""Data-quality dimensions: completeness, validity, uniqueness, timeliness.
-
-Mapped to the canonical DAMA-DMBOK data quality framework — the same
-vocabulary Stats NZ uses internally for data-platform health metrics.
-"""
-
 from __future__ import annotations
 
 import pandas as pd

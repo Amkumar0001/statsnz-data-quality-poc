@@ -17,14 +17,6 @@ from src.utils.test_logger import (
 
 @dataclass
 class StatsNZHomePage:
-    """Page Object for the Stats NZ public homepage and search.
-
-    Uses role-/label-based selectors for resilience — IDs and class names
-    on this site change frequently across redesigns. Each public method
-    emits human-readable step logs through src.utils.test_logger so the
-    test transcript reads like a narrative.
-    """
-
     page: Page
     base_url: str
 

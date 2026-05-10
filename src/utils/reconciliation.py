@@ -7,8 +7,6 @@ import pandas as pd
 
 @dataclass
 class ReconciliationReport:
-    """Summary of a row-by-row comparison between two DataFrames."""
-
     left_rows: int
     right_rows: int
     common_rows: int
@@ -33,12 +31,6 @@ def reconcile(
     keys: list[str],
     numeric_columns: list[str] | None = None,
 ) -> ReconciliationReport:
-    """Reconcile two DataFrames on a composite key.
-
-    Counts overlap, flags rows missing from either side, and computes
-    sum differences on numeric columns — the three checks every reco
-    pipeline does.
-    """
     merged = left.merge(
         right,
         on=keys,

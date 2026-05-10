@@ -10,13 +10,6 @@ from great_expectations.expectations.expectation import Expectation
 
 
 def cpi_expectations() -> list[Expectation]:
-    """Canonical Great Expectations definitions for the CPI dataset.
-
-    Each expectation maps to a data-quality dimension we care about:
-    completeness, validity, uniqueness, and value-range sanity.
-    Returned as a plain list so callers can introspect without an
-    active GX data context.
-    """
     return [
         gxe.ExpectColumnToExist(column="Series_reference"),
         gxe.ExpectColumnToExist(column="Period"),
@@ -38,7 +31,6 @@ def cpi_expectations() -> list[Expectation]:
 
 
 def validate_dataframe(df: pd.DataFrame) -> ExpectationSuiteValidationResult:
-    """Validate a DataFrame against the CPI suite using an ephemeral GX context."""
     context = gx.get_context(mode="ephemeral")
     data_source = context.data_sources.add_pandas("cpi_pandas")
     asset = data_source.add_dataframe_asset(name="cpi_asset")

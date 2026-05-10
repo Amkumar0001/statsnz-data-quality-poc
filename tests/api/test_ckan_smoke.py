@@ -1,9 +1,3 @@
-"""Live tests against the data.govt.nz CKAN API.
-
-CKAN is public-read (no auth) so these tests run anywhere the network is open.
-They are still marked `live` so CI can opt out by default.
-"""
-
 from __future__ import annotations
 
 import pytest

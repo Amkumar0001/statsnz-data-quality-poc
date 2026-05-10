@@ -1,10 +1,3 @@
-"""Cross-source reconciliation.
-
-In production this is UI-download vs API vs bulk-file. Here we reconcile
-two snapshots that should be byte-identical, then prove the framework
-catches drift when one side is mutated.
-"""
-
 from __future__ import annotations
 
 import pandas as pd

@@ -1,17 +1,9 @@
 from __future__ import annotations
 
 import pytest
-import requests
 
 from src.clients.ckan_api import CkanClient
 from src.clients.statsnz_api import StatsNZClient
-
-
-@pytest.fixture(scope="session")
-def http_session() -> requests.Session:
-    s = requests.Session()
-    s.headers["User-Agent"] = "statsnz-dq/0.1 (+https://github.com/aman/statsnz-data-quality-poc)"
-    return s
 
 
 @pytest.fixture(scope="session")

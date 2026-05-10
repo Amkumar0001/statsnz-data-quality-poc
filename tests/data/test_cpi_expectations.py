@@ -1,11 +1,3 @@
-"""Great Expectations suite run on the CPI snapshot.
-
-GX overlaps with Pandera — it's here for two reasons:
-1. The GX HTML data docs are a strong portfolio artefact.
-2. Real Stats NZ pipelines often use GX checkpoints in production;
-   showing fluency in both tools matters in the interview.
-"""
-
 from __future__ import annotations
 
 import pandas as pd

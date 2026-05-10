@@ -7,12 +7,6 @@ import requests
 
 @dataclass
 class CkanClient:
-    """Minimal client for the data.govt.nz CKAN open-data API.
-
-    No auth required for read endpoints — useful as a public smoke target
-    when STATS_NZ_API_KEY is not yet provisioned.
-    """
-
     base_url: str
     timeout: int = 30
 

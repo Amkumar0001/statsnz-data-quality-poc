@@ -24,13 +24,6 @@ def browser_context_args(browser_context_args: dict, statsnz_site_url: str) -> d
 
 @pytest.fixture(autouse=True)
 def _human_readable_logger(request: pytest.FixtureRequest) -> Generator[None, None, None]:
-    """Wrap every UI test in a section banner + summary banner.
-
-    Resets the step counter, prints a section header titled by the test
-    nodeid, runs the test, then prints a pass/fail summary with duration
-    and total steps. Output mirrors the pattern from the published
-    TypeScript logger (medium.com/@Amkumar001).
-    """
     reset_step_counter()
     log_section(request.node.name)
     started = time.perf_counter()

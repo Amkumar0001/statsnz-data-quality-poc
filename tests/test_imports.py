@@ -1,9 +1,3 @@
-"""Sanity check that every src module imports cleanly.
-
-Catches packaging mistakes (missing __init__.py, circular imports, typos
-in fixture names) before any real test even tries to run.
-"""
-
 from __future__ import annotations
 
 import pytest
