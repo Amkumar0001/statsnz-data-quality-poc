@@ -17,11 +17,12 @@ from src.validators.cpi_expectations import cpi_expectations, validate_dataframe
 @pytest.mark.expectations
 def test_cpi_suite_passes_on_clean_snapshot(cpi_dataframe: pd.DataFrame) -> None:
     result = validate_dataframe(cpi_dataframe)
-    failed = [r for r in result.results if not r.success]
-    assert result.success, (
-        f"GX suite failed; failed expectations: "
-        f"{[r.expectation_config.type for r in failed]}"
-    )
+    failed_types = [
+        r.expectation_config.type
+        for r in result.results
+        if not r.success and r.expectation_config is not None
+    ]
+    assert result.success, f"GX suite failed; failed expectations: {failed_types}"
 
 
 @pytest.mark.expectations

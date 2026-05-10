@@ -18,7 +18,7 @@ import pytest
 def test_completeness_no_nulls_in_required_columns(
     cpi_dataframe: pd.DataFrame, column: str
 ) -> None:
-    null_count = int(cpi_dataframe[column].isna().sum())
+    null_count = len(cpi_dataframe[cpi_dataframe[column].isna()])
     assert null_count == 0, f"{column} has {null_count} nulls"
 
 
@@ -70,7 +70,7 @@ def test_timeliness_latest_period_within_two_years(cpi_dataframe: pd.DataFrame) 
 
 @pytest.mark.quality
 def test_accuracy_food_index_increases_monotonically(cpi_dataframe: pd.DataFrame) -> None:
-    food = cpi_dataframe[cpi_dataframe["Group"] == "Food"].sort_values("Period")
+    food = cpi_dataframe.loc[cpi_dataframe["Group"] == "Food"].sort_values(by="Period")
     assert food["Data_value"].is_monotonic_increasing, (
         "food index should be monotonically increasing across the sample window"
     )
