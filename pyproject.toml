@@ -30,6 +30,10 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--tb=short",
+    # tee-sys captures stdout/stderr AND mirrors them to the terminal —
+    # the human-readable test logger needs live output during the run,
+    # not only on failure.
+    "--capture=tee-sys",
 ]
 markers = [
     "smoke: quick sanity checks against APIs/services",
