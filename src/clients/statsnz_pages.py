@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from playwright.sync_api import Page, expect
@@ -21,7 +22,7 @@ class StatsNZHomePage:
         return self
 
     def expect_loaded(self) -> StatsNZHomePage:
-        expect(self.page).to_have_title(lambda title: "stats" in title.lower())
+        expect(self.page).to_have_title(re.compile(r"stats", re.IGNORECASE))
         return self
 
     def search(self, term: str) -> StatsNZSearchResultsPage:
@@ -37,7 +38,7 @@ class StatsNZSearchResultsPage:
 
     def expect_results(self, term: str) -> StatsNZSearchResultsPage:
         self.page.wait_for_load_state("domcontentloaded")
-        expect(self.page).to_have_url(lambda url: "search" in url.lower())
+        expect(self.page).to_have_url(re.compile(r"search", re.IGNORECASE))
         body_text = self.page.locator("body").inner_text().lower()
         assert term.lower() in body_text, f"expected '{term}' in results page body"
         return self
