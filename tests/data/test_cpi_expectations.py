@@ -10,7 +10,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from src.validators.cpi_expectations import validate_dataframe
+from src.validators.cpi_expectations import cpi_expectations, validate_dataframe
 
 
 @pytest.mark.expectations
@@ -33,3 +33,15 @@ def test_cpi_suite_catches_out_of_range_value(cpi_dataframe: pd.DataFrame) -> No
     df.loc[df.index[0], "Data_value"] = 99999.0
     result = validate_dataframe(df)
     assert not result.success
+
+
+@pytest.mark.expectations
+def test_suite_contains_expected_dimensions() -> None:
+    types = {e.type for e in cpi_expectations()}
+    for required in (
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_between",
+        "expect_column_values_to_match_regex",
+        "expect_compound_columns_to_be_unique",
+    ):
+        assert required in types, f"suite is missing {required}"
